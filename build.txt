@@ -7,5 +7,3 @@ hideResources = false
 
 includeSource = true
 includePDB = true
-
-buildIgnore = obj/, bin/

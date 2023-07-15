@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -24,12 +26,10 @@ public sealed partial class Defiance : Mod {
         MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("AddWorldDifficultyOptions", flags), Add_Patch);
         MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("MakeInfoMenu", flags), Make_Patch);
 
-        On_UIWorldCreation.SetupGamepadPoints += (orig, self, batch) => {  };
-
         On_UIWorldSelect.NewWorldClick += (orig, self, evt, element) => { orig(self, evt, element); };
     }
 
-    protected void Make_Patch(ILContext il) {
+    private void Make_Patch(ILContext il) {
         var c = new ILCursor(il);
 
         c.GotoNext(i => i.MatchNewobj(typeof(UIElement).GetConstructor(Type.EmptyTypes)));
@@ -38,10 +38,12 @@ public sealed partial class Defiance : Mod {
         c.Emit(OpCodes.Pop).Emit(OpCodes.Newobj, typeof(UIGrid).GetConstructor(Type.EmptyTypes));
         c.Emit(OpCodes.Dup);
         
-        c.EmitDelegate(delegate(UIGrid self) { self.ListPadding = 0f; });
+        c.EmitDelegate(delegate(UIGrid self) {
+            self.ListPadding = 0f;
+        });
     }
 
-    protected void Add_Patch(ILContext il) {
+    private void Add_Patch(ILContext il) {
         var c = new ILCursor(il);
 
         c.GotoNext(i => i.MatchStloc(0));
