@@ -1,0 +1,11 @@
+displayName = Defiance
+author = nakamurash
+version = 0.1
+
+hideCode = false
+hideResources = false
+
+includeSource = true
+includePDB = true
+
+buildIgnore = obj/, bin/

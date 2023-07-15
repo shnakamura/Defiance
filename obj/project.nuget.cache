@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "6BjEPnSKVLZdM5jOgST5ENgwLUnHbUgM0XjFArVth4VLB4vA/nAvjY5STdJRDbY1pcATPYVhL5tZq0qLPeRY2w==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\joaov\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Defiance\\Defiance.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\joaov\\.nuget\\packages\\tmodloader.codeassist\\0.1.5\\tmodloader.codeassist.0.1.5.nupkg.sha512"
+  ],
+  "logs": []
+}
