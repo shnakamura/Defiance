@@ -52,7 +52,12 @@ public sealed partial class Defiance : Mod {
             var enumType = array.GetType().GetElementType();
             var newArray = Array.CreateInstance(enumType, array.Length + DifficultyCount);
 
-            for (var i = 0; i < array.Length + DifficultyCount; i++) {
+            newArray.SetValue(Enum.ToObject(enumType, 3), 0);
+            newArray.SetValue(Enum.ToObject(enumType, 0), 1);
+            newArray.SetValue(Enum.ToObject(enumType, 1), 2);
+            newArray.SetValue(Enum.ToObject(enumType, 2), 3);
+
+            for (var i = 4; i < array.Length + DifficultyCount; i++) {
                 newArray.SetValue(Enum.ToObject(enumType, i), i);
             }
 
