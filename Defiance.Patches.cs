@@ -14,6 +14,11 @@ namespace Defiance;
 
 public sealed partial class Defiance : Mod {
     public override void Load() {
+        if (DifficultyCount <= 0) {
+            Logger.Info("No custom difficulties were added.");
+            return;
+        }
+        
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
         MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("AddWorldDifficultyOptions", flags), Add_Patch);
@@ -61,8 +66,8 @@ public sealed partial class Defiance : Mod {
         c.EmitDelegate(delegate(ref LocalizedText[] array) {
             var list = new List<LocalizedText>(array);
 
-            foreach (var modDifficulty in ModContent.GetContent<ModDifficulty>()) {
-                list.Add(Language.GetText(GetLocalizationKey($"Difficulties.{modDifficulty.GetType().Name}.DisplayName")));
+            foreach (var difficulty in ModContent.GetContent<ModDifficulty>()) {
+                list.Add(Language.GetText(difficulty.Mod.GetLocalizationKey($"Difficulties.{difficulty.GetType().Name}.DisplayName")));
             }
 
             array = list.ToArray();
@@ -75,8 +80,8 @@ public sealed partial class Defiance : Mod {
         c.EmitDelegate(delegate(ref LocalizedText[] array) {
             var list = new List<LocalizedText>(array);
 
-            foreach (var modDifficulty in ModContent.GetContent<ModDifficulty>()) {
-                list.Add(Language.GetText(GetLocalizationKey($"Difficulties.{modDifficulty.GetType().Name}.Description")));
+            foreach (var difficulty in ModContent.GetContent<ModDifficulty>()) {
+                list.Add(Language.GetText(difficulty.Mod.GetLocalizationKey($"Difficulties.{difficulty.GetType().Name}.Description")));
             }
 
             array = list.ToArray();
@@ -103,8 +108,8 @@ public sealed partial class Defiance : Mod {
         c.EmitDelegate(delegate(ref string[] array) {
             var list = new List<string>(array);
 
-            foreach (var modDifficulty in ModContent.GetContent<ModDifficulty>()) {
-                list.Add(modDifficulty.IconTexture);
+            foreach (var difficulty in ModContent.GetContent<ModDifficulty>()) {
+                list.Add(difficulty.IconTexture);
             }
 
             array = list.ToArray();
