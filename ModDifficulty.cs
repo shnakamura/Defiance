@@ -12,8 +12,8 @@ public abstract class ModDifficulty : ModType {
     public abstract string BunnyTexture { get; protected set; }
     public abstract string BackgroundTexture { get; protected set; }
     
-    public bool Enabled { get; internal set; }
-
+    public int Id { get; internal set; }
+    
     protected sealed override void Register() {
         ModTypeLookup<ModDifficulty>.Register(this);
 
