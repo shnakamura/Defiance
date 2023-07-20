@@ -12,7 +12,7 @@ public abstract class ModDifficulty : ModType, ILocalizedModType {
     /// <summary>
     ///     The internal identity of this difficulty mode.
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; internal set; }
 
     /// <summary>
     ///     The translations for the display name of this difficulty mode.
