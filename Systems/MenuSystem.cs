@@ -56,14 +56,14 @@ internal sealed class MenuSystem : ModSystem {
         c.Emit(OpCodes.Ldloca, 0);
         c.EmitDelegate(delegate(ref Array array) {
             var enumType = array.GetType().GetElementType();
-            var newArray = Array.CreateInstance(enumType, array.Length + DifficultyLoader.ModdedDifficultyCount);
+            var newArray = Array.CreateInstance(enumType, array.Length + ModDifficultyLoader.ModdedDifficultyCount);
 
             newArray.SetValue(Enum.ToObject(enumType, 3), 0);
             newArray.SetValue(Enum.ToObject(enumType, 0), 1);
             newArray.SetValue(Enum.ToObject(enumType, 1), 2);
             newArray.SetValue(Enum.ToObject(enumType, 2), 3);
 
-            for (var i = 4; i < array.Length + DifficultyLoader.ModdedDifficultyCount; i++) {
+            for (var i = 4; i < array.Length + ModDifficultyLoader.ModdedDifficultyCount; i++) {
                 newArray.SetValue(Enum.ToObject(enumType, i), i);
             }
 

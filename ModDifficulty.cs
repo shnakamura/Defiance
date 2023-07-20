@@ -47,10 +47,6 @@ public abstract class ModDifficulty : ModType, ILocalizedModType {
     public string LocalizationCategory { get; } = "Difficulties";
 
     protected sealed override void Register() {
-        DifficultyLoader.Register(this);
-    }
-
-    public bool IsEnabled() {
-        return Main.GameMode == Id;
+        ModDifficultyLoader.Register(this);
     }
 }

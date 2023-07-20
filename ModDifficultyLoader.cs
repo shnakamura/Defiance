@@ -7,7 +7,7 @@ namespace Defiance;
 /// <summary>
 ///     Provides centralized difficulty loading and handling.
 /// </summary>
-public static class DifficultyLoader {
+public static class ModDifficultyLoader {
     /// <summary>
     ///     The current amount of vanilla difficulties.
     /// </summary>
