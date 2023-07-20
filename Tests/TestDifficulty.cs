@@ -1,3 +1,3 @@
-namespace Defiance.Tests; 
+namespace Defiance.Tests;
 
 public class TestDifficulty : ModDifficulty { }

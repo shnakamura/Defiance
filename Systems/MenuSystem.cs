@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Terraria;
 using Terraria.GameContent.UI.States;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -15,8 +13,6 @@ using Terraria.UI;
 namespace Defiance.Systems;
 
 internal sealed class MenuSystem : ModSystem {
-    public static int DifficultyCount => ModContent.GetContent<ModDifficulty>().Count();
-
     public override void OnModLoad() {
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
         var type = typeof(UIWorldCreation);
@@ -26,6 +22,7 @@ internal sealed class MenuSystem : ModSystem {
 
         On_UIWorldSelect.NewWorldClick += (orig, self, evt, element) => { orig(self, evt, element); };
 
+        // TODO: Fix unknown issue with UI snap points.
         On_UIWorldCreation.SetupGamepadPoints += (orig, self, batch) => { };
     }
 
@@ -36,7 +33,7 @@ internal sealed class MenuSystem : ModSystem {
         if (!c.TryGotoNext(i => i.MatchNewobj(typeof(UIElement).GetConstructor(Type.EmptyTypes)))) {
             return;
         }
-        
+
         c.Index++;
 
         c.Emit(OpCodes.Pop);
@@ -53,20 +50,20 @@ internal sealed class MenuSystem : ModSystem {
         if (!c.TryGotoNext(i => i.MatchStloc(0))) {
             return;
         }
-        
+
         c.Index++;
 
         c.Emit(OpCodes.Ldloca, 0);
         c.EmitDelegate(delegate(ref Array array) {
             var enumType = array.GetType().GetElementType();
-            var newArray = Array.CreateInstance(enumType, array.Length + DifficultyCount);
+            var newArray = Array.CreateInstance(enumType, array.Length + DifficultyLoader.ModdedDifficultyCount);
 
             newArray.SetValue(Enum.ToObject(enumType, 3), 0);
             newArray.SetValue(Enum.ToObject(enumType, 0), 1);
             newArray.SetValue(Enum.ToObject(enumType, 1), 2);
             newArray.SetValue(Enum.ToObject(enumType, 2), 3);
 
-            for (var i = 4; i < array.Length + DifficultyCount; i++) {
+            for (var i = 4; i < array.Length + DifficultyLoader.ModdedDifficultyCount; i++) {
                 newArray.SetValue(Enum.ToObject(enumType, i), i);
             }
 
@@ -77,7 +74,7 @@ internal sealed class MenuSystem : ModSystem {
         if (!c.TryGotoNext(i => i.MatchStloc(1))) {
             return;
         }
-        
+
         c.Index++;
 
         c.Emit(OpCodes.Ldloca, 1);
@@ -90,7 +87,7 @@ internal sealed class MenuSystem : ModSystem {
         if (!c.TryGotoNext(i => i.MatchStloc(2))) {
             return;
         }
-        
+
         c.Index++;
 
         c.Emit(OpCodes.Ldloca, 2);
@@ -103,7 +100,7 @@ internal sealed class MenuSystem : ModSystem {
         if (!c.TryGotoNext(i => i.MatchStloc(3))) {
             return;
         }
-        
+
         c.Index++;
 
         c.Emit(OpCodes.Ldloca, 3);
@@ -116,7 +113,7 @@ internal sealed class MenuSystem : ModSystem {
         if (!c.TryGotoNext(i => i.MatchStloc(4))) {
             return;
         }
-        
+
         c.Index++;
 
         c.Emit(OpCodes.Ldloca, 4);
@@ -124,12 +121,12 @@ internal sealed class MenuSystem : ModSystem {
             var range = ModContent.GetContent<ModDifficulty>().Select(x => x.IconTexture);
             array = array.Concat(range).ToArray();
         });
-        
+
         // Replaces .Append() calls for .Add()
         if (!c.TryGotoNext(i => i.MatchCallvirt(typeof(UIElement).GetMethod("Append")))) {
             return;
         }
-        
+
         c.Remove();
         c.EmitDelegate(delegate(UIElement self, UIElement element) {
             if (self is not UIGrid grid) {
@@ -139,7 +136,7 @@ internal sealed class MenuSystem : ModSystem {
             element.Width = StyleDimension.FromPercent(0.25f);
             element.HAlign = 0f;
             element.VAlign = 0.5f;
-            
+
             grid.Add(element);
         });
     }
