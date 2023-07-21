@@ -1,1 +1,3 @@
+Defiance is a library which allows for modders to effortlessly add custom world difficulties to their mods, eliminating the need of manual work.
+
 Icon by @funk.it

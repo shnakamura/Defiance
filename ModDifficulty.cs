@@ -32,17 +32,19 @@ public abstract class ModDifficulty : ModType, ILocalizedModType {
     /// <summary>
     ///     The path to the icon texture that will appear for this difficulty in the button selection menu.
     /// </summary>
-    public virtual string IconTexture { get; protected set; } = "Images/UI/WorldCreation/IconDifficultyExpert";
+    public virtual string IconTexture { get; protected set; } = "Terraria/Images/UI/WorldCreation/IconDifficultyExpert";
 
     /// <summary>
     ///     The path to the bunny texture that will appear for this difficulty in the world creation preview frame.
     /// </summary>
-    public virtual string BunnyTexture { get; protected set; } = "Images/UI/WorldCreation/PreviewDifficultyExpert2";
+    public virtual string BunnyTexture { get; protected set; } = "Terraria/Images/UI/WorldCreation/PreviewDifficultyExpert2";
 
     /// <summary>
     ///     The path to the background texture that will appear for this difficulty in the world creation preview frame.
     /// </summary>
-    public virtual string BackgroundTexture { get; protected set; } = "Images/UI/WorldCreation/PreviewDifficultyExpert1";
+    public virtual string BackgroundTexture { get; protected set; } = "Terraria/Images/UI/WorldCreation/PreviewDifficultyExpert1";
+    
+    // Images/UI/WorldCreation/PreviewDifficultyExpert1
 
     public string LocalizationCategory { get; } = "Difficulties";
 

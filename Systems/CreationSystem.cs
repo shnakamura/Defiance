@@ -2,8 +2,11 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using ReLogic.Content;
+using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -12,21 +15,64 @@ using Terraria.UI;
 
 namespace Defiance.Systems;
 
-internal sealed class MenuSystem : ModSystem {
+internal sealed class CreationSystem : ModSystem {
+    private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+    
     public override void OnModLoad() {
-        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-        var type = typeof(UIWorldCreation);
+        MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("AddWorldDifficultyOptions", Flags), AddWorldDifficultyOptions_Patch);
+        MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("MakeInfoMenu", Flags), MakeInfoMenu_Patch);
 
-        MonoModHooks.Modify(type.GetMethod("AddWorldDifficultyOptions", flags), Add_Patch);
-        MonoModHooks.Modify(type.GetMethod("MakeInfoMenu", flags), Menu_Patch);
-
+        MonoModHooks.Modify(typeof(UIWorldCreationPreview).GetMethod("DrawSelf", Flags), SelfDraw_Patch);
+        
         On_UIWorldSelect.NewWorldClick += (orig, self, evt, element) => { orig(self, evt, element); };
 
         // TODO: Fix unknown issue with UI snap points.
         On_UIWorldCreation.SetupGamepadPoints += (orig, self, batch) => { };
     }
 
-    private static void Menu_Patch(ILContext il) {
+    private static void SelfDraw_Patch(ILContext il) {
+        var c = new ILCursor(il);
+
+        // Custom background
+        if (!c.TryGotoNext(i => i.MatchSwitch(out _))) {
+            return;
+        }
+
+        c.Index++;
+
+        c.Emit(OpCodes.Ldloc, 1);
+        c.Emit(OpCodes.Ldloc, 2);
+        
+        c.Emit(OpCodes.Ldarg_0);
+        c.Emit(OpCodes.Ldfld, typeof(UIWorldCreationPreview).GetField("_difficulty", BindingFlags.Instance | BindingFlags.NonPublic));
+        
+        c.Emit(OpCodes.Ldarg_1);
+        
+        c.EmitDelegate(delegate(Vector2 position, Color color, byte difficulty, SpriteBatch spriteBatch) {
+            spriteBatch.Draw(ModContent.Request<Texture2D>(ModDifficultyLoader.Get(difficulty).BackgroundTexture).Value, position, color);
+        });
+        
+        // Custom bunny
+        if (!c.TryGotoNext(i => i.MatchSwitch(out _)) || !c.TryGotoNext(i => i.MatchSwitch(out _)) || !c.TryGotoNext(i => i.MatchSwitch(out _))) {
+            return;
+        }
+
+        c.Index++;
+
+        c.Emit(OpCodes.Ldloc, 1);
+        c.Emit(OpCodes.Ldloc, 2);
+        
+        c.Emit(OpCodes.Ldarg_0);
+        c.Emit(OpCodes.Ldfld, typeof(UIWorldCreationPreview).GetField("_difficulty", Flags));
+        
+        c.Emit(OpCodes.Ldarg_1);
+        
+        c.EmitDelegate(delegate(Vector2 position, Color color, byte difficulty, SpriteBatch spriteBatch) {
+            spriteBatch.Draw(ModContent.Request<Texture2D>(ModDifficultyLoader.Get(difficulty).BunnyTexture).Value, position, color);
+        });
+    }
+
+    private static void MakeInfoMenu_Patch(ILContext il) {
         // TODO: Append the difficulty buttons to a new scrollable UIGrid instead of the base panel, then proceed to append that grid to the base panel instead.
         var c = new ILCursor(il);
 
@@ -43,7 +89,7 @@ internal sealed class MenuSystem : ModSystem {
         c.EmitDelegate(delegate(UIGrid self) { self.ListPadding = 0f; });
     }
 
-    private static void Add_Patch(ILContext il) {
+    private static void AddWorldDifficultyOptions_Patch(ILContext il) {
         var c = new ILCursor(il);
 
         // Options
@@ -63,7 +109,7 @@ internal sealed class MenuSystem : ModSystem {
             newArray.SetValue(Enum.ToObject(enumType, 1), 2);
             newArray.SetValue(Enum.ToObject(enumType, 2), 3);
 
-            for (var i = 4; i < array.Length + ModDifficultyLoader.ModdedDifficultyCount; i++) {
+            for (var i = ModDifficultyLoader.VanillaDifficultyCount; i < array.Length + ModDifficultyLoader.ModdedDifficultyCount; i++) {
                 newArray.SetValue(Enum.ToObject(enumType, i), i);
             }
 
@@ -119,11 +165,31 @@ internal sealed class MenuSystem : ModSystem {
         c.Emit(OpCodes.Ldloca, 4);
         c.EmitDelegate(delegate(ref string[] array) {
             var range = ModContent.GetContent<ModDifficulty>().Select(x => x.IconTexture);
-            array = array.Concat(range).ToArray();
+            array = array.Concat(Enumerable.Repeat("Images/UI/WorldCreation/IconDifficultyNormal", range.Count())).ToArray();
+        });
+
+        if (!c.TryGotoNext(i => i.MatchStloc(7))) {
+            return;
+        }
+
+        c.Index++;
+        
+        c.Emit(OpCodes.Ldloc, 7);
+        
+        c.Emit(OpCodes.Ldflda, typeof(GroupOptionButton<>).MakeGenericType(typeof(UIWorldCreation).GetNestedType("WorldDifficultyId", Flags)).GetField("_iconTexture", Flags));
+        
+        c.Emit(OpCodes.Ldloc, 6);
+
+        c.EmitDelegate(delegate(ref Asset<Texture2D> iconTexture, int id) {
+            if (id < ModDifficultyLoader.VanillaDifficultyCount) {
+                return;
+            }
+
+            iconTexture = ModContent.Request<Texture2D>(ModDifficultyLoader.Get(id).IconTexture);
         });
 
         // Replaces .Append() calls for .Add()
-        if (!c.TryGotoNext(i => i.MatchCallvirt(typeof(UIElement).GetMethod("Append")))) {
+        if (!c.TryGotoNext(i => i.MatchCallOrCallvirt(typeof(UIElement).GetMethod("Append")))) {
             return;
         }
 

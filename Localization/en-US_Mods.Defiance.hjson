@@ -1,6 +1,6 @@
 Difficulties: {
 	TestDifficulty: {
-		DisplayName: Test Difficulty
+		DisplayName: Test
 		Description: This is for testing purposes!
 	}
 }
