@@ -21,7 +21,7 @@ internal sealed class CreationSystem : ModSystem {
     public override void OnModLoad() {
         MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("AddWorldDifficultyOptions", Flags), AddWorldDifficultyOptions_Patch);
         MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("MakeInfoMenu", Flags), MakeInfoMenu_Patch);
-
+UIWorldListItem
         MonoModHooks.Modify(typeof(UIWorldCreationPreview).GetMethod("DrawSelf", Flags), SelfDraw_Patch);
         
         On_UIWorldSelect.NewWorldClick += (orig, self, evt, element) => { orig(self, evt, element); };

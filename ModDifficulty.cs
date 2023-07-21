@@ -27,22 +27,22 @@ public abstract class ModDifficulty : ModType, ILocalizedModType {
     /// <summary>
     ///     The color of the display name text.
     /// </summary>
-    public virtual Color TextColor { get; protected set; } = Color.White;
+    public virtual Color TextColor { get; } = Color.White;
 
     /// <summary>
     ///     The path to the icon texture that will appear for this difficulty in the button selection menu.
     /// </summary>
-    public virtual string IconTexture { get; protected set; } = "Terraria/Images/UI/WorldCreation/IconDifficultyExpert";
+    public virtual string IconTexture { get; } = "Terraria/Images/UI/WorldCreation/IconDifficultyExpert";
 
     /// <summary>
     ///     The path to the bunny texture that will appear for this difficulty in the world creation preview frame.
     /// </summary>
-    public virtual string BunnyTexture { get; protected set; } = "Terraria/Images/UI/WorldCreation/PreviewDifficultyExpert2";
+    public virtual string BunnyTexture { get; } = "Terraria/Images/UI/WorldCreation/PreviewDifficultyExpert2";
 
     /// <summary>
     ///     The path to the background texture that will appear for this difficulty in the world creation preview frame.
     /// </summary>
-    public virtual string BackgroundTexture { get; protected set; } = "Terraria/Images/UI/WorldCreation/PreviewDifficultyExpert1";
+    public virtual string BackgroundTexture { get; } = "Terraria/Images/UI/WorldCreation/PreviewDifficultyExpert1";
     
     // Images/UI/WorldCreation/PreviewDifficultyExpert1
 
