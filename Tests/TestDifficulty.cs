@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+
 namespace Defiance.Tests;
 
 public class TestDifficulty : ModDifficulty {
@@ -8,4 +10,6 @@ public class TestDifficulty : ModDifficulty {
     public override bool IsJourneyMode => true;
     
     public override float EnemyMaxLifeMultiplier => 50f;
+
+    public override Color TextColor => Color.Green;
 }

@@ -12,32 +12,19 @@ internal sealed class SelectionSystem : ModSystem {
     private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
     public override void OnModLoad() {
-        MonoModHooks.Modify(typeof(AWorldListItem).GetMethod("GetDifficulty", Flags), GetDifficulty_Patch);
+        On_AWorldListItem.GetDifficulty += GetDifficulty_Hook;
     }
 
-    private static void GetDifficulty_Patch(ILContext il) {
-        var c = new ILCursor(il);
-
-        // World selection
-        if (!c.TryGotoNext(i => i.MatchSwitch(out _)) || !c.TryGotoNext(i => i.MatchSwitch(out _))) {
+    private static void GetDifficulty_Hook(On_AWorldListItem.orig_GetDifficulty orig, AWorldListItem self, out string expertText, out Color gameModeColor) {
+        var type = typeof(AWorldListItem).GetField("_data", Flags);
+        var value = (WorldFileData)type.GetValue(self);
+        
+        if (value.GameMode < ModDifficultyLoader.VanillaDifficultyCount || value.ForTheWorthy) {
+            orig(self, out expertText, out gameModeColor);
             return;
         }
 
-        c.Index++;
-
-        c.Emit(OpCodes.Ldarg, 1);
-        c.Emit(OpCodes.Ldarg, 2);
-
-        c.Emit(OpCodes.Ldarg, 0);
-        c.Emit(OpCodes.Ldfld, typeof(AWorldListItem).GetField("_data", Flags));
-
-        c.EmitDelegate(delegate(ref string expertText, ref Color gameModeColor, WorldFileData _data) {
-            if (_data.GameMode < ModDifficultyLoader.VanillaDifficultyCount || _data.ForTheWorthy) {
-                return;
-            }
-
-            expertText = ModDifficultyLoader.Get(_data.GameMode).DisplayName.Value;
-            gameModeColor = ModDifficultyLoader.Get(_data.GameMode).TextColor;
-        });
+        expertText = ModDifficultyLoader.Get(value.GameMode).DisplayName.Value;
+        gameModeColor = ModDifficultyLoader.Get(value.GameMode).TextColor;
     }
 }
