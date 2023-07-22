@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using ReLogic.Content;
+using Terraria;
+using Terraria.DataStructures;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
 using Terraria.Localization;
@@ -17,17 +19,40 @@ namespace Defiance.Systems;
 
 internal sealed class CreationSystem : ModSystem {
     private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
-    
+
     public override void OnModLoad() {
         MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("AddWorldDifficultyOptions", Flags), AddWorldDifficultyOptions_Patch);
         MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("MakeInfoMenu", Flags), MakeInfoMenu_Patch);
-UIWorldListItem
+        MonoModHooks.Modify(typeof(UIWorldCreation).GetMethod("FinishCreatingWorld", Flags), FinishCreatingWorld_Patch);
+
         MonoModHooks.Modify(typeof(UIWorldCreationPreview).GetMethod("DrawSelf", Flags), SelfDraw_Patch);
         
         On_UIWorldSelect.NewWorldClick += (orig, self, evt, element) => { orig(self, evt, element); };
 
         // TODO: Fix unknown issue with UI snap points.
         On_UIWorldCreation.SetupGamepadPoints += (orig, self, batch) => { };
+    }
+
+    private static void FinishCreatingWorld_Patch(ILContext il) {
+        var c = new ILCursor(il);
+
+        // Set Main.GameMode
+        if (!c.TryGotoNext(i => i.MatchSwitch(out _)) || !c.TryGotoNext(i => i.MatchSwitch(out _))) {
+            return;
+        }
+
+        c.Index++;
+        
+        c.Emit(OpCodes.Ldarg, 0);
+        c.Emit(OpCodes.Ldfld, typeof(UIWorldCreation).GetField("_optionDifficulty", Flags));
+
+        c.EmitDelegate(delegate(byte _optionDifficulty) {
+            if (_optionDifficulty < ModDifficultyLoader.VanillaDifficultyCount) {
+                return;
+            }
+
+            Main.GameMode = _optionDifficulty;
+        });
     }
 
     private static void SelfDraw_Patch(ILContext il) {
@@ -43,10 +68,10 @@ UIWorldListItem
         c.Emit(OpCodes.Ldloc, 1);
         c.Emit(OpCodes.Ldloc, 2);
         
-        c.Emit(OpCodes.Ldarg_0);
-        c.Emit(OpCodes.Ldfld, typeof(UIWorldCreationPreview).GetField("_difficulty", BindingFlags.Instance | BindingFlags.NonPublic));
+        c.Emit(OpCodes.Ldarg, 0);
+        c.Emit(OpCodes.Ldfld, typeof(UIWorldCreationPreview).GetField("_difficulty", Flags));
         
-        c.Emit(OpCodes.Ldarg_1);
+        c.Emit(OpCodes.Ldarg, 1);
         
         c.EmitDelegate(delegate(Vector2 position, Color color, byte difficulty, SpriteBatch spriteBatch) {
             spriteBatch.Draw(ModContent.Request<Texture2D>(ModDifficultyLoader.Get(difficulty).BackgroundTexture).Value, position, color);
@@ -62,10 +87,10 @@ UIWorldListItem
         c.Emit(OpCodes.Ldloc, 1);
         c.Emit(OpCodes.Ldloc, 2);
         
-        c.Emit(OpCodes.Ldarg_0);
+        c.Emit(OpCodes.Ldarg, 0);
         c.Emit(OpCodes.Ldfld, typeof(UIWorldCreationPreview).GetField("_difficulty", Flags));
         
-        c.Emit(OpCodes.Ldarg_1);
+        c.Emit(OpCodes.Ldarg, 1);
         
         c.EmitDelegate(delegate(Vector2 position, Color color, byte difficulty, SpriteBatch spriteBatch) {
             spriteBatch.Draw(ModContent.Request<Texture2D>(ModDifficultyLoader.Get(difficulty).BunnyTexture).Value, position, color);
