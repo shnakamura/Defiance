@@ -7,13 +7,13 @@ namespace Defiance;
 public static class ModDifficultyLoader {
     public const int VanillaDifficultyCount = 4;
 
+    internal static readonly List<ModDifficulty> Difficulties = new List<ModDifficulty>();
+
     public static int DifficultyCount { get; private set; } = VanillaDifficultyCount;
 
     public static int ModdedDifficultyCount => DifficultyCount - VanillaDifficultyCount;
 
-    internal static List<ModDifficulty> Difficulties { get; set; } = new List<ModDifficulty>();
-
-    internal static int Register<T>(T difficulty) where T : ModDifficulty {
+    internal static int Add<T>(T difficulty) where T : ModDifficulty {
         ModTypeLookup<ModDifficulty>.Register(difficulty);
 
         Difficulties.Add(difficulty);
@@ -21,7 +21,7 @@ public static class ModDifficultyLoader {
 
         return DifficultyCount - 1;
     }
-    
+
     public static ModDifficulty Get(int index) {
         return Difficulties[index - VanillaDifficultyCount];
     }
